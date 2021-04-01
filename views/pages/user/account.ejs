@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<div id="main" style="visibility: hidden;">
+    <style>
+        [v-cloak] { display: none }
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .outer-div {
+            display: flex; justify-content: center;  height: 100%; width: 100%; padding: 24px; 
+        }
+
+        .inner-div {
+            display: flex; justify-content: center; flex-direction: column; 
+        }
+
+        .center-cropped {
+            object-position: center;
+            object-fit: cover;
+            width: 400px;
+            height: 400px;
+            border-radius: 192px;
+            border: solid 1px rgb(94, 94, 94);
+            margin-bottom: 16px;
+        }
+
+        /* Statistics e.g. followers count */
+        .stats {
+            display: flex; 
+            justify-content: center; 
+            flex-direction: column; 
+            margin-right: 20px;
+            margin-top: 24px;
+            max-height: 22px;
+        }
+
+        .outer-stats {
+            display: flex; 
+            justify-content: center;
+        }
+
+        .stats-style {
+            color: black;
+            text-decoration: none;
+        }
+        /* MODAL FORMS */
+        .modal-form {
+            margin: auto; background-color: white;
+            width: fit-content; padding: 16px;
+            border-radius: 5px;
+            max-height: 600px;
+        }
+
+        input {
+            width: 360px;
+        }
+        .settings {
+            height: fit-content;
+            width: 400px;
+            background-color: whitesmoke;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 24px;
+        }
+
+        .modal-container {
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            position: fixed;
+            padding-top: 100px;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .cnfrimDeleteTitle {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .xDismiss {
+            width: 35px;
+            height: 35px;
+            margin-right: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .red {
+            background-color: red;
+            width: 110px;
+            height: 40px;
+            font-size: large;
+        }
+        
+        .gray {
+            background-color: gray;
+            width: 110px;
+            height: 40px;
+            font-size: large;
+        }
+
+        .green {
+            background-color: green;
+            width: 110px;
+            height: 40px;
+            font-size: large;
+        }
+
+        .xDismiss {
+            width: 35px;
+            height: 35px;
+            margin-right: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .settings-buttons {
+            color: white;
+            background-color: green;
+            margin-bottom: 8px;
+            border-radius: 50px;
+            height: 40px;
+            width: 360px;
+        }
+
+        .settings-buttons-grey {
+            color: white;
+            background-color: gray;
+            margin-bottom: 8px;
+            border-radius: 50px;
+            height: 40px;
+            width: 360px;
+        }
+
+        .svg-icon {
+            width: 65px;
+            height: 65px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .svg-icon path,
+        .svg-icon polygon,
+        .svg-icon rect {
+            fill: #1c1f24;
+        }
+
+        .svg-icon circle {
+            stroke: #1c1f24;
+            stroke-width: 1;
+        }
+
+        p {
+            margin-left: 16px;
+        }
+    </style>
+
+    <div id="app" class="outer-div">
+        <!-- I'm going to grab this value when I fire off a delete/post request... -->
+        <input type="hidden" id="csrf" value="<%= _csrf %>"/>
+        <div class="inner-div">
+            <!-- DELETE POST FORM -->
+            <div v-if="isShowingDelete" class="modal-container">
+                <div class="modal-form" style="display: flex;">
+                    <div class="cnfrimDeleteTitle">
+                        Are you sure you want to delete?
+                        
+                        <div style="margin-top: 24px;">
+                            <button v-on:click="confirmDelete()" style="color: white; cursor: pointer;" 
+                                v-bind:class="[isDeletingPost ? 'gray' : 'red']">
+                                    Delete
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <br>
+    
+                    <div style="flex: 1;"></div>
+    
+                    <div>
+                        <svg class="xDismiss" v-on:click="isShowingDelete = false"
+                        viewBox="0 0 20 20">
+                            <path 
+                                fill="black" 
+                                d="M15.898,4.045c-0.271-0.272-0.713-0.272-0.986,0l-4.71,4.711L5.493,4.045c-0.272-0.272-0.714-0.272-0.986,0s-0.272,0.714,0,0.986l4.709,4.711l-4.71,4.711c-0.272,0.271-0.272,0.713,0,0.986c0.136,0.136,0.314,0.203,0.492,0.203c0.179,0,0.357-0.067,0.493-0.203l4.711-4.711l4.71,4.711c0.137,0.136,0.314,0.203,0.494,0.203c0.178,0,0.355-0.067,0.492-0.203c0.273-0.273,0.273-0.715,0-0.986l-4.711-4.711l4.711-4.711C16.172,4.759,16.172,4.317,15.898,4.045z">
+                            </path>
+                    </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- POST CREATION FORM -->
+            <div v-if="isShowingImageReq" class="modal-container">
+                <div class="modal-form">
+                    <div style="margin-left: 97%;">
+                        <img v-on:click="isShowingImageReq = false" src="/images/icon-close.png" class="xDismiss">
+                    </div>
+                    <h1>
+                        1. Make sure your image is formatted correctly
+                    </h1>
+                    
+                    <h4 style="margin-bottom: 24px;">
+                        If your image does not end with a .JPEG, .JPG, .PNG, or .ICO <br> then that is probably why.
+                        Please consider converting your image on the web or choosing <br> a new image, Sorry for the inconvenience.
+                    </h4>
+                    
+                    <h1>
+                        2. <a href="/contact">Contact support</a>
+                    </h1>
+                </div>
+            </div>
+            <div v-if="isShowingCreation" class="modal-container">
+                <div class="modal-form">
+                    <div>
+                        Create Post
+                    </div>
+                    
+                    <div style="margin-bottom: 8px; margin-top: 12px;">
+                        <textarea style="height: 100px; width: 97%; 
+                        border: solid 1px darkgray; margin: 10px 0px; font-family: Arial, Helvetica, sans-serif;" 
+                        v-model="postBodyText" 
+                        placeholder="Whats on your mind? Upcoming events? New stuff? Let us know!....."></textarea>
+                        <div style="color: red;">
+                            Please NOTE: You must include text & image.
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <img style="max-width: 100%; margin-top: 12px; max-height: 250px;" :src="postFileImageSource">
+                        </div>
+                        <div>
+                            <input v-on:change="handleFileChange" type="file">
+                            <div v-if="imageHasSelected">
+                                <p class="text-center">Image not showing up? 
+                                    <a class="learn-why" v-on:click="isShowingImageReq = true, isShowingCreation = false">
+                                        Learn why
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1"></div>
+                    
+                    <button style="width: 110px; height: 40px; font-size: large; cursor: pointer;" 
+                        v-on:click="isShowingCreation = false">
+                        Cancel
+                    </button>
+                    <button style="color: white; border-radius: 5px; border: solid 1px; margin-left: 12px; cursor: pointer;"
+                        v-bind:class="isCreatingPost ? 'gray' : 'green'"
+                        v-on:click="createPost()">
+                        Create
+                    </button>
+                </div>
+            </div>
+            <!-- HEADER (PROFILE PIC, FULL NAME, BIO) -->
+            <div style="display: flex; justify-content: center; flex-direction: column;">
+                <div>
+                    <img class="center-cropped" :src="user.profileImageUrl ? user.profileImageUrl : '/images/placeholder-pic.png'" alt="Profile picture">
+                </div>
+                <h1 style="max-width: 360px; line-break: anywhere; text-transform: capitalize; margin-left: 15px;" class="text-center">
+                    <strong>{{user.fullName}}</strong>
+                </h1>
+                <p style="max-width: 360px; line-break: anywhere;" class="text-center"><strong>{{user.bio}}</strong></p>
+            </div>
+            <!-- FOLLOWER & FOLLOWING STATS -->
+            <div class="outer-stats">
+                <div class="stats">
+                    <a :href="'/followers/user?user=' + user.id"><h4 class="stats-style">Followers</h4></a>
+                    <h4 class="text-center"><strong>{{user.followers.length}}</strong></h4>
+                </div>
+                <div>
+                    <a :href="'/following/user?user=' + user.id"><h4 class="stats-style">Following</h4></a>
+                    <h4 class="text-center"><strong>{{user.following.length}}</strong></h4>
+                </div>
+                <div class="stats">
+                    <h4 class="stats-style" style="margin-left: 16px;">Posts</h4>
+                    <h4 class="text-center"><strong>{{user.posts.length}}</strong></h4>
+                </div>
+            </div>
+            <!-- SETTINGS FORM -->
+            <div v-if="showSettings" class="settings">
+                <h2 style="font-weight: bold;">Settings</h2>
+                <div style="margin-bottom: 16px; width: 365px;">
+                    <h5>Full name</h5>
+                    <input style="text-transform: capitalize;" v-model="user.fullName" type="text" placeholder="Full name..." maxlength="50">
+                    <h6 style="color: grey;">50 character maximum</h6>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h5>Bio (not required)</h5>
+                    <input v-model="user.bio" type="text" placeholder="Bio..." maxlength="1000">
+                    <h6 style="color: grey;">1000 character maximum</h6>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h5>Profile picture</h5>
+                    <div>
+                        <img style="width: 100px; height: 100px;" alt="Profile picture" class="center-cropped" :src="user.profileImageUrl ? user.profileImageUrl : '/images/placeholder-pic.png'">
+                    </div>
+                    <input v-on:change="handleAvatarChange" type="file">
+                </div>
+                <button v-on:click="handleSave()" v-bind:class="isSaving ? 'settings-buttons-grey' : 'settings-buttons'">Save</button>
+                <a href="/band-form" style="color: white;"><button class="settings-buttons">{{user.isBand ? 'Update band information' : 'Upgrade to band' }}</button></a>      
+                <div v-if="showError" style="color: red;">
+                    <h5 style="margin-left: 24px; margin-top: 16px; width: 360px;">There was an error, <br> make sure all required fields <br> filled in! Or, <a href="/contact">Contact support</a></h5>
+                </div>   
+            </div>
+
+            <!-- CREATE & UPDATE BUTTONS -->
+            <div style="display: flex;">
+                <a href="/account-update"><svg class="svg-icon" style="margin-left: 16px;" viewBox="0 0 20 20">
+                    <path fill="none" 
+                    d="M2.25,12.584c-0.713,0-1.292,0.578-1.292,1.291s0.579,1.291,1.292,1.291c0.713,0,1.292-0.578,1.292-1.291S2.963,12.584,2.25,12.584z M2.25,14.307c-0.238,0-0.43-0.193-0.43-0.432s0.192-0.432,0.43-0.432c0.238,0,0.431,0.193,0.431,0.432S2.488,14.307,2.25,14.307z M5.694,6.555H18.61c0.237,0,0.431-0.191,0.431-0.43s-0.193-0.431-0.431-0.431H5.694c-0.238,0-0.43,0.192-0.43,0.431S5.457,6.555,5.694,6.555z M2.25,8.708c-0.713,0-1.292,0.578-1.292,1.291c0,0.715,0.579,1.292,1.292,1.292c0.713,0,1.292-0.577,1.292-1.292C3.542,9.287,2.963,8.708,2.25,8.708z M2.25,10.43c-0.238,0-0.43-0.192-0.43-0.431c0-0.237,0.192-0.43,0.43-0.43c0.238,0,0.431,0.192,0.431,0.43C2.681,10.238,2.488,10.43,2.25,10.43z M18.61,9.57H5.694c-0.238,0-0.43,0.192-0.43,0.43c0,0.238,0.192,0.431,0.43,0.431H18.61c0.237,0,0.431-0.192,0.431-0.431C19.041,9.762,18.848,9.57,18.61,9.57z M18.61,13.443H5.694c-0.238,0-0.43,0.193-0.43,0.432s0.192,0.432,0.43,0.432H18.61c0.237,0,0.431-0.193,0.431-0.432S18.848,13.443,18.61,13.443z M2.25,4.833c-0.713,0-1.292,0.578-1.292,1.292c0,0.713,0.579,1.291,1.292,1.291c0.713,0,1.292-0.578,1.292-1.291C3.542,5.412,2.963,4.833,2.25,4.833z M2.25,6.555c-0.238,0-0.43-0.191-0.43-0.43s0.192-0.431,0.43-0.431c0.238,0,0.431,0.192,0.431,0.431S2.488,6.555,2.25,6.555z">
+                    </path>
+                </svg></a>
+
+                <svg v-on:click="showCreationForm()" class="svg-icon" viewBox="0 0 20 20">
+                    <path 
+                        d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10">
+                    </path>
+                </svg>
+
+                <svg v-on:click="showSettings = !showSettings" class="svg-icon" style="margin-right: 16px;" viewBox="0 0 20 20">
+                    <path fill="none" d="M10.032,8.367c-1.112,0-2.016,0.905-2.016,2.018c0,1.111,0.904,2.014,2.016,2.014c1.111,0,2.014-0.902,2.014-2.014C12.046,9.271,11.143,8.367,10.032,8.367z M10.032,11.336c-0.525,0-0.953-0.427-0.953-0.951c0-0.526,0.427-0.955,0.953-0.955c0.524,0,0.951,0.429,0.951,0.955C10.982,10.909,10.556,11.336,10.032,11.336z"></path>
+                    <path fill="none" d="M17.279,8.257h-0.785c-0.107-0.322-0.237-0.635-0.391-0.938l0.555-0.556c0.208-0.208,0.208-0.544,0-0.751l-2.254-2.257c-0.199-0.2-0.552-0.2-0.752,0l-0.556,0.557c-0.304-0.153-0.617-0.284-0.939-0.392V3.135c0-0.294-0.236-0.532-0.531-0.532H8.435c-0.293,0-0.531,0.237-0.531,0.532v0.784C7.582,4.027,7.269,4.158,6.966,4.311L6.409,3.754c-0.1-0.1-0.234-0.155-0.376-0.155c-0.141,0-0.275,0.055-0.375,0.155L3.403,6.011c-0.208,0.207-0.208,0.543,0,0.751l0.556,0.556C3.804,7.622,3.673,7.935,3.567,8.257H2.782c-0.294,0-0.531,0.238-0.531,0.531v3.19c0,0.295,0.237,0.531,0.531,0.531h0.787c0.105,0.318,0.236,0.631,0.391,0.938l-0.556,0.559c-0.208,0.207-0.208,0.545,0,0.752l2.254,2.254c0.208,0.207,0.544,0.207,0.751,0l0.558-0.559c0.303,0.154,0.616,0.285,0.938,0.391v0.787c0,0.293,0.238,0.531,0.531,0.531h3.191c0.295,0,0.531-0.238,0.531-0.531v-0.787c0.322-0.105,0.636-0.236,0.938-0.391l0.56,0.559c0.208,0.205,0.546,0.207,0.752,0l2.252-2.254c0.208-0.207,0.208-0.545,0.002-0.752l-0.559-0.559c0.153-0.303,0.285-0.615,0.389-0.938h0.789c0.295,0,0.532-0.236,0.532-0.531v-3.19C17.812,8.495,17.574,8.257,17.279,8.257z M16.747,11.447h-0.653c-0.241,0-0.453,0.164-0.514,0.398c-0.129,0.496-0.329,0.977-0.594,1.426c-0.121,0.209-0.089,0.473,0.083,0.645l0.463,0.465l-1.502,1.504l-0.465-0.463c-0.174-0.174-0.438-0.207-0.646-0.082c-0.447,0.262-0.927,0.463-1.427,0.594c-0.234,0.061-0.397,0.271-0.397,0.514V17.1H8.967v-0.652c0-0.242-0.164-0.453-0.397-0.514c-0.5-0.131-0.98-0.332-1.428-0.594c-0.207-0.123-0.472-0.09-0.646,0.082l-0.463,0.463L4.53,14.381l0.461-0.463c0.169-0.172,0.204-0.434,0.083-0.643c-0.266-0.461-0.467-0.939-0.596-1.43c-0.06-0.234-0.272-0.398-0.514-0.398H3.313V9.319h0.652c0.241,0,0.454-0.162,0.514-0.397c0.131-0.498,0.33-0.979,0.595-1.43c0.122-0.208,0.088-0.473-0.083-0.645L4.53,6.386l1.503-1.504l0.46,0.462c0.173,0.172,0.437,0.204,0.646,0.083c0.45-0.265,0.931-0.464,1.433-0.597c0.233-0.062,0.396-0.274,0.396-0.514V3.667h2.128v0.649c0,0.24,0.161,0.452,0.396,0.514c0.502,0.133,0.982,0.333,1.433,0.597c0.211,0.12,0.475,0.089,0.646-0.083l0.459-0.462l1.504,1.504l-0.463,0.463c-0.17,0.171-0.202,0.438-0.081,0.646c0.263,0.448,0.463,0.928,0.594,1.427c0.061,0.235,0.272,0.397,0.514,0.397h0.651V11.447z"></path>
+                </svg>
+
+            </div>
+
+            <div v-for="p in user.posts" style="width: 360px;">
+                <%- partial('../partials/post.ejs') %>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../partials/loading.ejs') %>
+    </div>
+
+    <script>
+        //Whenever I send off a post/delete/put req I'll send this value along with it.
+        const csrf = $("#csrf").val()
+        const app = new Vue({
+            el: '#app',
+            data: {
+                user: null,
+
+                //Bools for deleting posts
+                isShowingDelete: false,
+                postToDelete: null,
+                isDeletingPost: false,
+
+                //Bools for creating posts
+                isShowingCreation: false,
+                isCreatingPost: false,
+                postBodyText: null,
+                postFileImageSource: null,
+                selectedFile: null,
+                //Set this to true when the users image does not show, stands for -
+                //is showing image requirements
+                isShowingImageReq: false,
+                imageHasSelected: false,
+
+                //Settings values
+                showSettings: false,
+                isSaving: false,
+                avatarFile: null,
+                showError: false
+            }, 
+            methods: {
+                //Delete functions
+                confirmDelete: async function() {
+                    const postId = this.postToDelete.id
+                    try {
+                        this.isDeletingPost = true
+                        axios.defaults.headers.delete['X-CSRF-Token'] = csrf;
+                        await axios.delete(`/post/${postId}`)
+                        this.isShowingDelete = false
+                        this.user.posts = this.user.posts.filter(p => {
+                            return p.id != this.postToDelete.id
+                        })
+                        this.isDeletingPost = false
+                    } catch (err) {
+                        console.error(err.toString())
+                    }
+                },
+
+                deletePost: function(post) {
+                    this.postToDelete = post
+                    this.isShowingDelete = true
+                    return
+                },
+                
+                //Post functions
+                createPost: async function() {
+                    // Before sending our POST request, we create FormData with postBody 
+                    // and imagefile for the server to consume
+                    const formData = new FormData()
+                    formData.append("postBody", this.postBodyText)
+                    formData.append('imagefile', this.selectedFile)
+                    if (this.postBodyText == null) {
+                        return
+                    }
+                    if (this.selectedFile == null) {
+                        return
+                    }
+                    try {
+                        this.isCreatingPost = true
+                        axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                        await axios.post('/create', formData)
+                        location.reload()
+                        this.isShowingCreation = false
+                    } catch (err) {
+                        this.isCreatingPost = false
+                        console.error(err.toString())
+                    }
+                },
+
+                showCreationForm: function() {
+                    this.isShowingCreation = true
+                },
+
+                handleFileChange: function(event) {
+                    this.selectedFile = event.target.files[0]
+                    this.postFileImageSource = window.URL.createObjectURL(this.selectedFile)
+                    this.imageHasSelected = true
+                },
+
+                //HANDLE SAVE FUNCTION (updating the account)
+                handleSave: async function() {
+                    const formData = new FormData()
+                    this.isSaving = true
+                    formData.append('fullName', this.user.fullName)
+                    formData.append('bio', this.user.bio)
+                    formData.append('imagefile', this.avatarFile)
+                    //Fire off the req
+                    try {
+                        axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                        await axios.post('/update-acc', formData)
+                        location.reload()
+                        this.showError = false
+                        this.isSaving = false
+                    } catch (err) {
+                        this.isSaving = false
+                        this.showError = true
+                        console.error(err.toString())
+                    }
+                },
+
+                //HANDLE AVATAR CHANGE
+                handleAvatarChange: function (event) {
+                    this.avatarFile = event.target.files[0]
+                    this.user.profileImageUrl = window.URL.createObjectURL(this.avatarFile)
+                }
+            },        
+            mounted () {
+                //Using jQuery to make ajax call
+                $.ajax({
+                    dataType: "json",
+                    data: null,
+                    async: true,
+                    url: "account-data",
+                    context: this,
+                    success: function(response) {
+                        this.user = response
+                        //Making the main div visible and loading view hidden once I have the data
+                        $("#loading").css('visibility', 'hidden')
+                        $("#main").css('visibility', 'visible');
+                    }
+                })
+            },
+        })
+
+    </script>
+</div>

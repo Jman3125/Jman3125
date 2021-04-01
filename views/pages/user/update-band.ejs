@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<div>
+    <style>
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        input {
+            width: 305px;
+        }
+
+        .checkbox {
+            margin-right: 10px;
+        }
+
+        .save-button {
+            width: 325px;
+            height: 50px;
+            color: white;
+            background-color: green;
+            border-radius: 25px;
+            font-size: larger;
+        }
+
+        .save-button-gray {
+            width: 325px;
+            height: 50px;
+            color: white;
+            border-radius: 25px;
+            font-size: larger;
+        }
+
+        textarea {
+            font-size: 14px; padding: 8px;
+            border-radius: 5px; width: 305px; height: 100px;
+            border: solid 1px rgb(36, 35, 35);
+        }
+
+        .outer-div {
+            display: flex; justify-content: center;  height: 100%; width: 100%; padding: 24px; 
+        }
+
+        .inner-div {
+            display: flex; justify-content: center; flex-direction: column; 
+        }
+    </style>
+
+    <div id="app" class="outer-div">
+        <!-- I'm going to grab this value when I fire off a delete/post request... -->
+        <input type="hidden" id="csrf" value="<%= _csrf %>"/>
+        <div class="inner-div">
+            <!-- HEADER -->
+            <h1>{{user.isBand ? 'Change your info.' : 'Time to update.'}}</h1>
+            <!-- CONTAINER FOR FORM ITEMS -->
+            <div style="display: flex; flex-direction: column; width: 275px;">
+                <!-- BAND NAME -->
+                <div style="margin-bottom: 16px;">
+                    <h5>Band name/ musician name</h5>
+                    <input type="text" v-model="user.fullName" placeholder="Name here..." maxlength="50" style="text-transform: capitalize;">
+                    <h6 style="color: grey;">50 character maximum</h6>
+                </div>
+                <!-- BIO -->
+                <div style="margin-bottom: 16px;">
+                    <h5>Bio (not required)</h5>
+                    <textarea v-model="user.bio"
+                        placeholder="Band members, fun facts, tell us about your act..."
+                        maxlength="1000">
+                    </textarea>
+                    <h6 style="color: grey;">1000 character maximum</h6>
+                </div>
+                <!-- Details about show -->
+                <div style="margin-bottom: 16px;">
+                    <h5>What's your show like? (not required)</h5>
+                    <textarea v-model="user.details"
+                        placeholder="We do a high energy show, our sets are about 30 minutes long....."
+                        maxlength="1000">
+                    </textarea>
+                    <h6 style="color: grey;">1000 character maximum</h6>
+                </div>
+                <!-- Location (state) -->
+                <div style="margin-bottom: 16px;">
+                    <h5>Location</h5>
+                    <select name="state" id="state" v-model="user.location">
+                        <option value="Alabama">Alabama</option>
+                        <option value="Alaska">Alaska</option>
+                        <option value="Arizona">Arizona</option>
+                        <option value="Arkansas">Arkansas</option>
+                        <option value="Northern California">Northern California</option>
+                        <option value="Southern California">Southern California</option>
+                        <option value="Colorado">Colorado</option>
+                        <option value="Connecticut">Connecticut</option>
+                        <option value="Delaware">Delaware</option>
+                        <option value="Florida">Florida</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Hawaii">Hawaii</option>
+                        <option value="Idaho">Idaho</option>
+                        <option value="Illinois">Illinois</option>
+                        <option value="Indiana">Indiana</option>
+                        <option value="Iowa">Iowa</option>
+                        <option value="Kansas">Kansas</option>
+                        <option value="Kentucky">Kentucky</option>
+                        <option value="Louisiana">Louisiana</option>
+                        <option value="Maine">Maine</option>
+                        <option value="Maryland">Maryland</option>
+                        <option value="Massachusetts">Massachusetts</option>
+                        <option value="Michigan">Michigan</option>
+                        <option value="Minnesota">Minnesota</option>
+                        <option value="Mississippi">Mississippi</option>
+                        <option value="Missouri">Missouri</option>
+                        <option value="Montana">Montana</option>
+                        <option value="Nebraska">Nebraska</option>
+                        <option value="Nevada">Nevada</option>
+                        <option value="New Hampshire">New Hampshire</option>
+                        <option value="New Jersey">New Jersey</option>
+                        <option value="New Mexico">New Mexico</option>
+                        <option value="New York">New York</option>
+                        <option value="North Carolina">North Carolina</option>
+                        <option value="North Dakota">North Dakota</option>
+                        <option value="Ohio">Ohio</option>
+                        <option value="Oklahoma">Oklahoma</option>
+                        <option value="Oregon">Oregon</option>
+                        <option value="Pennsylvania">Pennsylvania</option>
+                        <option value="Rhode Island">Rhode Island</option>
+                        <option value="South Carolina">South Carolina</option>
+                        <option value="South Dakota">South Dakota</option>
+                        <option value="Tennessee">Tennessee</option>
+                        <option value="Northern Texas">Northern Texas</option>
+                        <option value="Southern Texas">Southern Texas</option>
+                        <option value="Utah">Utah</option>
+                        <option value="Vermont">Vermont</option>
+                        <option value="Virginia">Virginia</option>
+                        <option value="Washington">Washington</option>
+                        <option value="West Virginia">West Virginia</option>
+                        <option value="Wisconsin">Wisconsin</option>
+                        <option value="Wyoming">Wyoming</option>
+                    </select>
+                </div>
+                <!-- TYPE OF MUSIC -->
+                <div style="margin-bottom: 16px;">
+                    <h5>What type of music?</h5>
+                    <select name="Type of music" id="musicType" v-model="user.musicType">
+                        <option value="Blues">Blues</option>
+                        <option value="Rock">Rock</option>
+                        <option value="Classical">Classical</option>
+                        <option value="Newage">Newage</option>
+                        <option value="Blues">Jazz</option>
+                        <option value="Electronic">Electronic</option>
+                        <option value="Hip-Hop">Hip-Hop</option>
+                        <option value="Children's">Children's</option>
+                        <option value="Pop">Pop</option>
+                        <option value="Reggae">Reggae</option>
+                        <option value="R&B">R&B</option>
+                        <option value="Country">Country</option>
+                        <option value="Folk">Folk</option>
+                        <option value="Funk/ Soul">Funk/ Soul</option>
+                        <option value="Rap">Rap</option>
+                    </select>
+                    <h6 style="margin-top: 16px;"><a href="/contact">Missing something? Have advice? Please, tell us.</a></h6>                  
+                </div>
+                <!-- HOW MUCH MUSIC DO YOU HAVE -->
+                <div style="margin-bottom: 16px;">
+                    <h5>How long can you play for?</h5>
+                    <input type="text" v-model="user.musicAmount" placeholder="We have 1 hour of music....">
+                </div>
+                <!-- MONEY PER SHOW -->
+                <div style="margin-bottom: 16px;">
+                    <h5>How much do you charge per show?</h5>
+                    <input type="text" v-model="user.moneyShow" placeholder="We charge 200$ per show...." style="margin-bottom: 10px;">
+                    <h6 style="color: grey;">NOTE: The hosts may ask to bargin with this price.</h6>
+                </div>
+                <!-- LINKS -->
+                <div style="margin-bottom: 16px;">
+                    <h5>Links (not required)</h5>
+                    <input type="text" v-model="user.links" placeholder="https://mysocialmediaacount.com...." style="margin-bottom: 10px;">
+                    <h6 style="color: grey;">This is to let people see you play, it is highly recommended, just add a link to one of your social media accounts with videos.</h6>
+                </div>
+                <!-- PHONE NUMBER -->
+                <div style="margin-bottom: 16px;">
+                    <h5>Phone (not required)</h5>
+                    <input type="text" v-model="user.phone" placeholder="Phone number...." style="margin-bottom: 10px;" maxlength="15">
+                    <h6 style="color: grey;">This is to let people get in touch with you in a different way, it is recommended.</h6>
+                </div>
+                <!-- TERMS -->
+                <label style="margin-left: 10px; width: 360px;">By clicking save, I have read & agree to the <br><a href="/terms">terms of service</a>. UPDATE ME BEFORE DEPLOY</label> 
+                <!-- SAVE BUTTON -->
+                <button v-bind:class="isSaving ? 'save-button-gray' : 'save-button'" v-on:click="handleSave()">Save</button>
+
+                <div v-if="showError" style="color: red;">
+                    <h5 style="margin-left: 24px; margin-top: 16px; width: 360px;">There was an error, <br> make sure all required fields <br> filled in! Or, <a href="/contact">Contact support</a></h5>
+                </div>
+                <hr/> 
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const csrf = $("#csrf").val()
+        const app = new Vue({
+            el: '#app',
+            data: {
+                user: null,
+                //When the save button is clicked (just to show the user that the request is being processed)
+                isSaving: false,
+                //Bool for error toggling after the request is sent
+                showError: false
+            },
+            methods: {
+                handleSave: async function() {
+                    const formData = new FormData()
+                    formData.append('fullName', this.user.fullName)
+                    formData.append('bio', this.user.bio)
+                    formData.append('details', this.user.details)
+                    formData.append('location', this.user.location)
+                    formData.append('musicType', this.user.musicType)
+                    formData.append('musicAmount', this.user.musicAmount)
+                    formData.append('moneyShow', this.user.moneyShow)
+                    formData.append('links', this.user.links)
+                    formData.append('phone', this.user.phone)
+
+                    //Fire off the req
+                    try {
+                        this.isSaving = true
+                        axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                        await axios.post('/update-band', formData)
+                        document.location = "/account"
+                        this.showError = false
+                        this.isSaving = false
+                    } catch (err) {
+                        this.isSaving = false
+                        this.showError = true
+                    }
+                }
+            },        
+            mounted () {
+                //Using jQuery to make ajax call
+                $.ajax({
+                    dataType: "json",
+                    data: null,
+                    async: true,
+                    url: "band-form-data",
+                    context: this,
+                    success: function(response) {
+                        this.user = response
+                        //Making the main div visible and loading view hidden once I have the data
+                        $("#loading").css('visibility', 'hidden')
+                        $("#main").css('visibility', 'visible');
+                    }
+                })
+            },
+        })
+    </script>
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../partials/loading.ejs') %>
+    </div>    
+</div>

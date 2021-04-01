@@ -1,0 +1,136 @@
+<!-- THIS FILE IS TO SHOW A LIST OF USERS AFTER A SEARCH -->
+<!DOCTYPE html>
+<!-- Search Bar -->
+<!-- Going to grab this value whenever I send post request (basically sending csrf token when the user follows and unfollows another user) -->
+<input type="hidden" id="csrf" value="<%= _csrf %>"/>
+
+<form class="search-form" id="form" role="search" action="/search-results/query" method="GET"> 
+    <!-- <input type="hidden" name="_csrf" value="<%= _csrf %>"/> -->
+    <input type="search" id="query" 
+    name="q" placeholder="Search band/venue names..." 
+    aria-label="Search through site content">
+    <button class="button-search">
+        <svg viewBox="0 0 1024 1024"><path 
+            class="path1" 
+            d="M848.471 928l-263.059-263.059c-48.941 36.706-110.118 55.059-177.412 55.059-171.294 0-312-140.706-312-312s140.706-312 312-312c171.294 0 312 140.706 312 312 0 67.294-24.471 128.471-55.059 177.412l263.059 263.059-79.529 79.529zM189.623 408.078c0 121.364 97.091 218.455 218.455 218.455s218.455-97.091 218.455-218.455c0-121.364-103.159-218.455-218.455-218.455-121.364 0-218.455 97.091-218.455 218.455z">
+        </path></svg>
+    </button>
+</form>
+<div style="padding: 16px;">
+    <button v-on:click="advancedSearch = !advancedSearch" style="all: unset; cursor: pointer; font-size: large; font-weight: bold;">Advanced Search</button>
+    <!-- Advanced search bar, for location, type of account, and type of music -->
+    <div v-if="advancedSearch" class="advancedSearch">
+        <div style="padding: 16px; display: flex; flex-direction: row;">
+            <form id="form" role="search" action="/advanced-search/query" method="GET"> 
+                <div style="display: flex; flex-direction: column;">
+                    <h3>Location</h3>
+                    <!-- Search for Location -->
+                    <select name="l" id="location" aria-label="Drop down to search for location">
+                        <option value="Alabama">Alabama</option>
+                        <option value="Alaska">Alaska</option>
+                        <option value="Arizona">Arizona</option>
+                        <option value="Arkansas">Arkansas</option>
+                        <option value="Northern California">Northern California</option>
+                        <option value="Southern California">Southern California</option>
+                        <option value="Colorado">Colorado</option>
+                        <option value="Connecticut">Connecticut</option>
+                        <option value="Delaware">Delaware</option>
+                        <option value="Florida">Florida</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Hawaii">Hawaii</option>
+                        <option value="Idaho">Idaho</option>
+                        <option value="Illinois">Illinois</option>
+                        <option value="Indiana">Indiana</option>
+                        <option value="Iowa">Iowa</option>
+                        <option value="Kansas">Kansas</option>
+                        <option value="Kentucky">Kentucky</option>
+                        <option value="Louisiana">Louisiana</option>
+                        <option value="Maine">Maine</option>
+                        <option value="Maryland">Maryland</option>
+                        <option value="Massachusetts">Massachusetts</option>
+                        <option value="Michigan">Michigan</option>
+                        <option value="Minnesota">Minnesota</option>
+                        <option value="Mississippi">Mississippi</option>
+                        <option value="Missouri">Missouri</option>
+                        <option value="Montana">Montana</option>
+                        <option value="Nebraska">Nebraska</option>
+                        <option value="Nevada">Nevada</option>
+                        <option value="New Hampshire">New Hampshire</option>
+                        <option value="New Jersey">New Jersey</option>
+                        <option value="New Mexico">New Mexico</option>
+                        <option value="New York">New York</option>
+                        <option value="North Carolina">North Carolina</option>
+                        <option value="North Dakota">North Dakota</option>
+                        <option value="Ohio">Ohio</option>
+                        <option value="Oklahoma">Oklahoma</option>
+                        <option value="Oregon">Oregon</option>
+                        <option value="Pennsylvania">Pennsylvania</option>
+                        <option value="Rhode Island">Rhode Island</option>
+                        <option value="South Carolina">South Carolina</option>
+                        <option value="South Dakota">South Dakota</option>
+                        <option value="Tennessee">Tennessee</option>
+                        <option value="Northern Texas">Northern Texas</option>
+                        <option value="Southern Texas">Southern Texas</option>
+                        <option value="Utah">Utah</option>
+                        <option value="Vermont">Vermont</option>
+                        <option value="Virginia">Virginia</option>
+                        <option value="Washington">Washington</option>
+                        <option value="West Virginia">West Virginia</option>
+                        <option value="Wisconsin">Wisconsin</option>
+                        <option value="Wyoming">Wyoming</option>
+                    </select>
+                </div>
+                <!-- Search for type of music -->
+                <div style="display: flex; flex-direction: column;">
+                    <h3>Music</h3>  
+                    <select name="mt" id="musictype" aria-label="Searc for type of music">
+                        <option value="Blues">Blues</option>
+                        <option value="Rock">Rock</option>
+                        <option value="Classical">Classical</option>
+                        <option value="Newage">Newage</option>
+                        <option value="Blues">Jazz</option>
+                        <option value="Electronic">Electronic</option>
+                        <option value="Hip-Hop">Hip-Hop</option>
+                        <option value="Children's">Children's</option>
+                        <option value="Pop">Pop</option>
+                        <option value="Reggae">Reggae</option>
+                        <option value="R&B">R&B</option>
+                        <option value="Country">Country</option>
+                        <option value="Folk">Folk</option>
+                        <option value="Funk/ Soul">Funk/ Soul</option>
+                        <option value="Rap">Rap</option>
+                    </select>
+                </div>
+                <button class="button-advancedSearch" style="background-color: green;">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+    <div v-for="u in users" style="margin-bottom: 16px;
+        padding: 16px; display: flex; width: 100%;" 
+        v-bind:key="u.id">
+        <div style="display: flex; justify-content: center;">
+            <img :src="u.profileImageUrl ? u.profileImageUrl : '/images/placeholder-pic.png'" loading="lazy" alt="Profile picture" class="center-cropped"  >
+
+            <div style="display: flex; flex-direction: column;">
+                <a :href="'/profile/user?u=' + u.id" style="color: black; max-width: 360px; line-break: anywhere; margin-top: 10px;">
+                    {{u.fullName}} 
+                </a>
+
+                <div v-if="u.isBand">
+                    <h6 style="color: green;">Musician</h6>
+                </div>
+            </div>
+        </div>
+
+        <div style="flex: 1;"></div>
+
+        <div>
+            <Button v-on:click="follow(u)" v-bind:class="u.isFollowing ? 'following' : 'not-following'" style="width: 150px; height: 40px;">
+                {{u.isFollowing ? 'Following' : 'Follow'}}
+            </Button>
+        </div>
+    </div>
+</div>
+    

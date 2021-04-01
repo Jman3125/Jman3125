@@ -1,0 +1,144 @@
+<div id="main" style="visibility: hidden; width: 100%;">
+    <style>
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .not-following {
+            width: 200; 
+            height: 40;  
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    
+        .following {
+            color: white;
+            background-color: green;
+            width: 200; 
+            height: 40; 
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    
+        .search-form {
+            background-color: #dfdfe2;
+            height: 50px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+    
+        input {
+            all: unset;
+            font: 16px ;
+            color: rgb(0, 0, 0);
+            height: 100%;
+            width: 100%;
+            padding: 6px 10px;
+        }
+    
+        .button-search {
+            all: unset;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+        }
+
+        .button-advancedSearch {
+            cursor: pointer;
+            width: 100px;
+            height: fit-content;
+            color: white;
+            align-items: center;
+            margin-top: 16px;
+            background-color: green;
+        }
+
+        svg {
+            color: rgb(37, 37, 37);
+            fill: currentColor;
+            width: 45px;
+            height: 45px;
+            padding: 10px;
+        }
+
+        .advancedSearch {
+            background-color: #dfdfe2;
+            height: fit-content;
+            width: 100%;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .center-cropped {
+            object-position: center; 
+            object-fit: cover; 
+            width: 60px;
+            height: 60px; 
+            border-radius: 192px; 
+            border: solid 1px rgb(94, 94, 94);
+            margin-right: 8px;
+        }
+    </style>
+    <div id="app">
+        <%- partial('../../partials/search-list.ejs') %>
+    </div>
+
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../../partials/loading.ejs') %>
+    </div>
+   
+   <script>
+       //Whenever I send off a post/delete/put req I'll send this value along with it.
+       const csrf = $("#csrf").val()
+       const app = new Vue({
+            el: '#app',
+            data: {
+                users: null,
+                advancedSearch: false,
+            },
+            methods: {
+                // This is the follow/unfollow function
+                follow: async function(user) {
+                    if (user.isFollowing) {
+                        axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                        //If the user is already folllowing, unfollow the selected user
+                        await axios.post('/unfollow/' + user.id)
+                    } else {
+                        //If the user has not already followed the selected user, then send the follow request with the user id
+                        await axios.post('/follow/' + user.id)
+                    }
+                    //Force manual update of UI
+                    const originalId = user.id
+                    user.id = "TEMP"
+                    user.isFollowing = !user.isFollowing
+                    user.id = originalId
+                }
+            },
+            mounted () {
+                //GRAB THE REQUESTED QUERY FROM THE BROWSER
+                var url_string = window.location;
+                var url = new URL(url_string);
+                var query = url.searchParams.get("q")
+                //Using jQuery to make ajax call
+                $.ajax({
+                    data: null, 
+                    async: true,
+                    url: "data/" + query,
+                    context: this,
+                    dataType: "json",
+                    success: function(response) {
+                        this.users = response
+                        //Making the main div visible once I have the data
+                        $("#loading").css('visibility', 'hidden')
+                        $("#main").css('visibility', 'visible');
+                    }
+                })
+            }
+       })
+   </script>
+</div>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<div>
+    <div id="main" style="visibility: hidden;">
+
+        <style>
+            html, body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+    
+            .outer-div {
+                display: flex; justify-content: center;  height: 100%; width: 100%; padding: 24px; 
+            }
+    
+            .inner-div {
+                display: flex; justify-content: center; flex-direction: column; 
+            }
+    
+            .not-following { 
+                border-radius: 20px;
+            }
+        
+            .following {
+                color: white;
+                background-color: green;
+                border-radius: 20px;
+            }
+    
+            .center-cropped {
+                object-position: center;
+                object-fit: cover;
+                width: 400px;
+                height: 400px;
+                border-radius: 192px;
+                border: solid 1px rgb(94, 94, 94);
+                margin-bottom: 16px;
+                margin-top: 16px;
+            }
+            /* Statistics e.g. followers count */
+            .stats {
+                display: flex; 
+                justify-content: center; 
+                flex-direction: column; 
+                margin-right: 16px;
+                margin-top: 24px;
+            }
+    
+            .outer-stats {
+                display: flex; 
+                justify-content: center;
+            }
+    
+            .stats-style {
+                color: black;
+                text-decoration: none;
+            }
+        </style>
+    
+        <div id="app" class="outer-div">
+            <!-- I'm going to grab this value when I fire off a delete/post request... -->
+            <input type="hidden" id="csrf" value="<%= _csrf %>"/>
+            <div class="inner-div">
+                <!-- Profile & Name -->
+                <div style="display: flex; justify-content: center; flex-direction: column;">
+                    <div>
+                        <strong><img :src="user.profileImageUrl ? user.profileImageUrl : '/images/placeholder-pic.png'" loading="lazy" class="center-cropped" alt="Profile picture"></strong>
+                    </div>
+                    <h1 class="text-center" style="max-width: 360px; line-break: anywhere; margin-left: 15px;">
+                        <strong>{{user.fullName}}</strong>
+                    </h1>
+                    <Button v-on:click="follow(user)" v-bind:class="user.isFollowing ? 'following' : 'not-following'" style="height: 40px;">
+                        {{user.isFollowing ? 'Following' : 'Follow'}}
+                    </Button>
+                </div>
+                <!-- Follower & Following count -->
+                <div class="outer-stats">
+                    <div class="stats">
+                        <a :href="'/followers/user?user=' + user.id"><h4 class="stats-style">Followers</h4></a>
+                        <h4 class="text-center"><strong>{{user.followers.length}}</strong></h4>
+                    </div>
+                    <div class="stats">
+                        <a :href="'/following/user?user=' + user.id"><h4 class="stats-style">Following</h4></a>
+                        <h4 class="text-center"><strong>{{user.following.length}}</strong></h4>
+                    </div>
+                    <div class="stats">
+                        <h4 class="text-center">Posts</h4>
+                        <h4 class="text-center"><strong>{{user.posts.length}}</strong></h4>
+                    </div>
+                </div>
+                <!-- Posts -->
+                <div v-for="p in user.posts" style="width: 360px;">
+                    <%- partial('../partials/post.ejs') %>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            //Whenever I send off a post/delete/put req I'll send this value along with it.
+            const csrf = $("#csrf").val()
+            const app = new Vue({
+                el: '#app',
+                data: {
+                    user: null
+                },
+                methods: {
+                    follow: async function(user) {
+                        axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                        if (user.isFollowing) {
+                            await axios.post('/unfollow/' + user.id)
+                        } else {
+                            await axios.post('/follow/' + user.id)
+                        }
+                        //Force manual update of UI
+                        const originalId = user.id
+                        user.id = "TEMP"
+                        user.isFollowing = !user.isFollowing
+                        user.id = originalId
+                    }
+                },
+                //Make the JSON call when the page loads
+                mounted () {
+                    //GRAB THE REQUESTED USER ID FROM THE BROWSER
+                    var url_string = window.location;
+                    var url = new URL(url_string);
+                    //Grabing the user Id from the browser here
+                    var user = url.searchParams.get("u")
+                    //Using jQuery to make ajax call
+                      $.ajax({
+                        data: null,
+                        async: true,
+                        url: "/user-data/" + user,
+                        context: this,
+                        dataType: "json",
+                        success: function(response) {
+                            this.user = response
+                            //Making the main div visible and loading view hidden once I have the data
+                            $("#loading").css('visibility', 'hidden')
+                            $("#main").css('visibility', 'visible');
+                        }
+                    }).fail(function() {
+                        //The server is going to throw a 500 server error, this could be because 
+                        //the user is requesting their own account, or there was an error but I'm mainly doing
+                        //this in the case that the user wants to see their own account
+                        window.location.replace('/account')
+                    })
+                }
+            })
+        </script>
+    </div>
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../partials/loading.ejs') %>
+    </div>
+</div>

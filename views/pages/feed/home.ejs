@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<div id="main" style="visibility: hidden;">
+    <style>
+
+        [v-cloak] { display: none }
+    
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+    
+        .outer-div {
+            display: flex; justify-content: center;  height: 100%; width: 100%; 
+        }
+    
+        .inner-div {
+            display: flex; justify-content: center; flex-direction: column; 
+        }
+    
+        .red {
+            background-color: red;
+            width: 110px;
+            height: 40px;
+            font-size: large;
+        }
+        
+        .gray {
+            background-color: gray;
+            width: 110px;
+            height: 40px;
+            font-size: large;
+        }
+    
+        .green {
+            background-color: green;
+            width: 110px;
+            height: 40px;
+            font-size: large;
+        }
+        
+        .modal-container {
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            position: fixed;
+            padding-top: 100px;
+            background-color: rgba(0, 0, 0, 0.8);
+            
+        }
+    
+        .selectedPost {
+            max-width: 400px; 
+            max-height: 390px; 
+            display: none;
+            object-fit: scale-down;
+        }
+    
+        .modal-form {
+            margin: auto; background-color: white;
+            width: fit-content; padding: 16px;
+            border-radius: 5px;
+            max-height: 600px;
+        }
+        
+        .cnfrimDeleteTitle {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .xDismiss {
+            width: 35px;
+            height: 35px;
+            margin-right: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .learn-why {
+            color: blue;
+            text-decoration-line: underline;
+            cursor: pointer;
+        }   
+    
+        svg {
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+        }
+    </style>
+    <div class="outer-div">
+        <div id="app" class="inner-div">
+            <!-- I'm going to grab this value when I fire off a delete/post request... -->
+            <input type="hidden" id="csrf" value="<%= _csrf %>"/>
+            <!-- Delete form -->
+            <div v-if="isShowingDelete" class="modal-container">
+                <div class="modal-form" style="display: flex;">
+                    <div class="cnfrimDeleteTitle">
+                        Are you sure you want to delete?
+                        
+                        <div style="margin-top: 24px;">
+                            <button v-on:click="confirmDelete()" style="color: white; cursor: pointer;" 
+                                v-bind:class="[isDeletingPost ? 'gray' : 'red']">
+                                    Delete
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    
+                    <div style="flex: 1;"></div>
+                    
+                    <div>
+                        <svg class="xDismiss" v-on:click="isShowingDelete = false"
+                        viewBox="0 0 20 20">
+                            <path
+                                fill="black" 
+                                d="M15.898,4.045c-0.271-0.272-0.713-0.272-0.986,0l-4.71,4.711L5.493,4.045c-0.272-0.272-0.714-0.272-0.986,0s-0.272,0.714,0,0.986l4.709,4.711l-4.71,4.711c-0.272,0.271-0.272,0.713,0,0.986c0.136,0.136,0.314,0.203,0.492,0.203c0.179,0,0.357-0.067,0.493-0.203l4.711-4.711l4.71,4.711c0.137,0.136,0.314,0.203,0.494,0.203c0.178,0,0.355-0.067,0.492-0.203c0.273-0.273,0.273-0.715,0-0.986l-4.711-4.711l4.711-4.711C16.172,4.759,16.172,4.317,15.898,4.045z">
+                            </path>
+                    </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div v-if="isShowingImageReq" class="modal-container">
+                <div class="modal-form">
+                    <div style="margin-left: 97%;">
+                        <img v-on:click="isShowingImageReq = false" src="/images/icon-close.png" class="xDismiss">
+                    </div>
+                    <h1>
+                        1. Make sure your image is formatted correctly
+                    </h1>
+                    
+                    <h4 style="margin-bottom: 24px;">
+                        If your image does not end with a .JPEG, .JPG, .PNG, or .ICO <br> then that is probably why.
+                        Please consider converting your image on the web or choosing <br> a new image, Sorry for the inconvenience.
+                    </h4>
+                    
+                    <h1>
+                        2. <a href="/contact">Contact support</a>
+                    </h1>
+                </div>
+            </div>
+            
+            <div v-if="isShowingCreation" class="modal-container">
+                <div class="modal-form">
+                    <div>
+                        Create Post
+                    </div>
+                    
+                    <div style="margin-bottom: 8px; margin-top: 12px;">
+                        <textarea style="height: 100px; width: 100%; 
+                        border: solid 1px darkgray; margin: 10px 0px; font-family: Arial, Helvetica, sans-serif;"
+                        v-model="postBodyText"
+                        placeholder="Whats on your mind? Upcoming events? New stuff? Let us know!"></textarea>
+                        <div style="color: red;">
+                            Please NOTE: You must include text & image.
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <img style="max-width: 100%; margin-top: 12px; max-height: 250px;" :src="postFileImageSource">
+                        </div>
+                        <div>
+                            <input type="file" v-on:change="handleFileChange">
+                            <div v-if="imageHasSelected">
+                                <p class="text-center">Image not showing up? 
+                                    <a class="learn-why" v-on:click="isShowingImageReq = true, isShowingCreation = false">
+                                        Learn why
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1"></div>
+                    
+                    <button style="width: 110px; height: 40px; font-size: large; cursor: pointer;" 
+                        v-on:click="isShowingCreation = false">
+                        Cancel
+                    </button>
+                    <button type="submit" style="color: white; border-radius: 5px; border: solid 1px; margin-left: 12px; cursor: pointer;"
+                        v-bind:class="isCreatingPost ? 'gray' : 'green'"
+                        v-on:click="createPost()">
+                        Create
+                    </button>
+                </div>
+            </div>
+            
+            <div>
+                <div>
+                    <svg v-on:click="showCreationForm()" class="svg-icon" viewBox="0 0 20 20">
+                        <path 
+                            d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10">
+                        </path>
+                    </svg>
+                </div>
+                <h1 class="text-center">Mi feed,</h1>
+                <br>
+                <div v-for="p in posts" style="width: 400px;">
+                    <%- partial('../partials/post.ejs') %>
+                </div>
+                <a style="line-break: auto;" href="/search">These are all of your posts, go follow more people to see more!</a>
+            </div>
+        </div>
+        <script>
+            //Whenever I send off a post/delete/put req I'll send this value along with it.
+            const csrf = $("#csrf").val()
+            const app = new Vue({
+                el: '#app',
+                data: {
+                    //Going to populate the post objects after ajax JSON request
+                    posts: null,
+                    //Bools for deleting posts
+                    isShowingDelete: false,
+                    postToDelete: null,
+                    isDeletingPost: false,
+    
+                    //Bools for creating posts
+                    isShowingCreation: false,
+                    isCreatingPost: false,
+                    postBodyText: null,
+                    postFileImageSource: null,
+                    selectedFile: null,
+                    //Set this to true when the users image does not show, stands for -
+                    //is showing image requirements
+                    isShowingImageReq: false,
+                    imageHasSelected: false
+                },
+                methods: {
+                    //Delete functions
+                    confirmDelete: async function() {
+                        const postId = this.postToDelete.id
+                        try {
+                            this.isDeletingPost = true
+                            axios.defaults.headers.delete['X-CSRF-Token'] = csrf;
+                            await axios.delete(`/post/${postId}`)
+                            this.isShowingDelete = false
+                            this.posts = this.posts.filter(p => {
+                                return p.id != this.postToDelete.id
+                            })
+                            this.isDeletingPost = false
+                        } catch (err) {
+                            console.error(err.toString())
+                        }
+                        
+                    },
+                    
+                    deletePost: function(post) {
+                        this.postToDelete = post
+                        this.isShowingDelete = true
+                        return
+                    },
+                    
+                    // Post functions
+                    createPost: async function() {
+                        const formData = new FormData()
+                        formData.append("postBody", this.postBodyText)
+                        formData.append('imagefile', this.selectedFile)
+                        
+                        try {
+                            this.isCreatingPost = true
+                            axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                            await axios.post('/create', formData)
+                            location.reload()
+                            this.isShowingCreation = false
+                            this.isCreatingPost = false
+                        } catch (err) {
+                            this.isCreatingPost = false
+                            console.error(err.toString())
+                        }
+                    },
+
+                    showCreationForm: function() {
+                        this.isShowingCreation = true
+                    },
+                    
+                    handleFileChange: function(event) {
+                        this.selectedFile = event.target.files[0]
+                        this.postFileImageSource = window.URL.createObjectURL(this.selectedFile)
+                        this.imageHasSelected = true
+                    },
+                },
+                //Make the JSON call when the page loads
+                mounted () {
+                    //Using jQuery to make ajax call
+                      $.ajax({
+                        data: null,
+                        async: true,
+                        url: "feed-data",
+                        context: this,
+                        dataType: "json",
+                        success: function(response) {
+                            this.posts = response
+                            //Making the main div visible and loading view hidden once I have the data
+                            //The loading state is below this code
+                            $("#loading").css('visibility', 'hidden')
+                            $("#main").css('visibility', 'visible');
+                        }
+                    })
+                }
+            })
+        </script>
+    </div>
+    <!-- This is the loading state -->
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../partials/loading.ejs') %>
+    </div>
+</div>

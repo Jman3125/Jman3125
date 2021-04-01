@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- Posts -->
+<div style="width: fit-content;
+    background-color: rgb(236, 235, 235);
+    padding: 24px;
+    margin-bottom: 24px;">
+    <div style="display: flex; margin-bottom: 16px;">
+        <div style="display: flex;">
+            <img :src="p.user.profileImageUrl ? p.user.profileImageUrl : '/images/placeholder-pic.png'" 
+            style="object-position: center; object-fit: cover; width: 60px;
+            height: 60px; border-radius: 192px; border: solid 1px rgb(94, 94, 94);" 
+            alt="Profile pic">
+
+            <div style="display: flex; flex-direction: column;">
+                <div style="max-width: 350px; line-break: anywhere; margin-left: 5px; font-size: 22px;">
+                    <strong>{{p.user.fullName}}</strong>
+                </div>
+
+                <div style="color: rgb(117, 115, 115); 
+                 font-size: 16px; margin-left: 10px;">
+                    <strong>{{p.fromNow}}</strong>
+                </div>
+            </div>
+        </div>
+        <svg v-if="p.canDelete" style="width: 40px; height: 40px; margin-right: 6px;
+            cursor: pointer; margin-left: auto;" v-on:click="deletePost(p)"
+            viewBox="0 0 20 20">
+                <path 
+                    fill="black" 
+                    d="M15.898,4.045c-0.271-0.272-0.713-0.272-0.986,0l-4.71,4.711L5.493,4.045c-0.272-0.272-0.714-0.272-0.986,0s-0.272,0.714,0,0.986l4.709,4.711l-4.71,4.711c-0.272,0.271-0.272,0.713,0,0.986c0.136,0.136,0.314,0.203,0.492,0.203c0.179,0,0.357-0.067,0.493-0.203l4.711-4.711l4.71,4.711c0.137,0.136,0.314,0.203,0.494,0.203c0.178,0,0.355-0.067,0.492-0.203c0.273-0.273,0.273-0.715,0-0.986l-4.711-4.711l4.711-4.711C16.172,4.759,16.172,4.317,15.898,4.045z">
+                </path>
+        </svg>
+    </div>
+    <div>
+        <strong><img :src="p.imageUrl" alt="Post picture" style="width: 355px;"></strong>
+    </div>
+    <div style="margin-top: 16px; line-break: anywhere;">
+        <strong>{{p.text}}</strong>
+    </div>
+</div>
