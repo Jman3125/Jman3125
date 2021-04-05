@@ -30,9 +30,6 @@ module.exports = {
     const options =
       { // This is the usual stuff
         adapter: require('skipper-better-s3')
-      , key: 'AKIAJJ2INFTT2N5R5NTA'
-      , secret: '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'
-      , bucket: 'myagent'
         // Let's use the custom s3params to upload this file as publicly
         // readable by anyone
       , s3params:
