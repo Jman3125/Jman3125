@@ -64,8 +64,8 @@ module.exports.routes = {
 
   //CUSTOM ROUTING
   //When you search a route it directs you to a view,
-  //that view then requests data from the url under it, e.g. the search view hits /search-controller
-  //and it then get's the data and renders the page out with the data
+  //that view then requests data from the url under it, e.g. the search view hits /search-data
+  //and it then get's the data and renders the page out with sed data
 
   //Home/main feed route
   'GET /': { 
@@ -88,7 +88,7 @@ module.exports.routes = {
 
   //Entrance route
   //Adding this as login so that it is the first page that people see when application is presented
-  //because I honeslty don't know how to change the route of the landing page
+  //because I honeslty don't know how to change the url of the landing page
   'GET /login': {
     view: 'pages/entrance/welcome',
     locals: {
@@ -112,7 +112,7 @@ module.exports.routes = {
   //Routes for updating the user
   'POST /update-acc':    { action: 'user/account/update-acc' },
   //Public profile
-  'GET /profile/user': {
+  'GET /public-profile/user': {
     view: 'pages/user/publicprofile',
     locals: {
       layout: 'layouts/layout'
@@ -164,7 +164,7 @@ module.exports.routes = {
   },
   'GET /advanced-search/data/:l/:mt': { action: 'user/advanced-search' },
   //Routes for band actions
-  'GET /band-form': { 
+  'GET /band-form': {
     view: 'pages/user/update-band',
     locals: {
       layout: 'layouts/layout'
@@ -172,5 +172,34 @@ module.exports.routes = {
   },
   'GET /band-form-data':       { action: 'user/band/band-form' },
   'POST /update-band':    { action: 'user/band/update-band' },
+
+  //USER INFORMATION
+  'GET /user-info/:u': {
+    view: 'pages/user/user-info',
+    locals: {
+      layout: 'layouts/layout'
+    }
+  },
+  'GET /user-info-data/:id': {action: 'user/userinfo'},
+
+  'GET /band-terms': {
+    view: 'pages/legal/band-terms',
+    locals: {
+      layout: 'layouts/layout'
+    }
+  },
+
+  //Like post route (claps)
+  'POST /clap/:p': {action: 'post/claps/clap'},
+  //Dislike or 'unclap' a post
+  'POST /unclap/:p': {action: 'post/claps/unclap'},
+  //Show the users who have liked a certain post
+  'GET /claps-page/post': {
+    view: 'pages/user/claps-page/claps',
+    locals: {
+      layout: 'layouts/layout'
+    }
+  },
+  'GET /post-claps/:p': {action: 'post/claps/claps-page'}
 
 };

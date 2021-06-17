@@ -1,10 +1,12 @@
 module.exports = async function(req, res) {
   const fullName = req.body.fullName
+  const showEmailValue = req.body.showEmail
   //Just doing a quick check to make sure there is a full name
   if (fullName == "") {
     return res.serverError()
-  }
+  } 
   const bio = req.body.bio
+  const phone = req.body.phone
   const file = req.file('imagefile')
   const userId = req.session.userId
   
@@ -17,7 +19,7 @@ module.exports = async function(req, res) {
   if (file.isNoop) {
     try {
         await User.update({id: req.session.userId})
-            .set({fullName: capFullName, bio: bio})
+            .set({fullName: capFullName, phone: phone, bio: bio, showEmail: showEmailValue})
             file.upload({noop: true})
             return res.end()
     } catch (error) {
@@ -28,7 +30,7 @@ module.exports = async function(req, res) {
   try {
     const fileUrl = await sails.helpers.uploadfile(file)
     await User.update({id: userId})
-      .set({fullName: capFullName, bio: bio, profileImageUrl: fileUrl})
+      .set({fullName: capFullName, phone: phone, bio: bio, profileImageUrl: fileUrl, showEmail: showEmailValue})
     res.end()
   } catch (err) {
     return res.serverError(err)

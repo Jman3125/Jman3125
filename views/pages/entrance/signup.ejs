@@ -4,6 +4,7 @@
     <div style="max-width: 450px;" class="mx-auto" >
       <p class="text-center">Let's get started! Becoming a member is free and only takes a few minutes. Also, to create a musicians account you must first create a regular account, then, if you wish, you can update your account to the musician tier free of charge!</p>
       <hr/>
+      <p class="text-center">Have an account? <a href="/signin">Sign in</a></p>
       <ajax-form action="signup" :syncing.sync="syncing" :cloud-error.sync="cloudError" :form-errors.sync="formErrors" :form-data="formData" :form-rules="formRules" @submitted="submittedForm()">
         <div class="form-group">
           <label for="full-name">Full name</label>
@@ -34,8 +35,11 @@
         <div class="form-group">
           <ajax-button type="submit" :syncing="syncing" class="btn-dark btn-lg btn-block">Create account</ajax-button>
         </div>
+        <div class="form-group" style="visibility: hidden;">
+          <label for="phone">Phone number</label>
+          <input class="form-control" id="phone" type="text"  v-model.trim="formData.phone" placeholder="Phone number">
+        </div>
       </ajax-form>
-      <p class="text-center">Have an account? <a href="/signin">Sign in</a></p>
     </div>
   </div>
   <div class="container-fluid pt-5 pb-5" v-if="cloudSuccess">

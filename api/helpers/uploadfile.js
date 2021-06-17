@@ -23,13 +23,18 @@ module.exports = {
 
   },
 
-
   fn: async function (inputs, exits) {
     const file = inputs.file
+
+    const key = process.env.AWS_Key
+    const secret = process.env.AWS_Secret
     // Upload file
     const options =
       { // This is the usual stuff
         adapter: require('skipper-better-s3')
+      , key: key
+      , secret: secret
+      , bucket: 'myagent'
         // Let's use the custom s3params to upload this file as publicly
         // readable by anyone
       , s3params:

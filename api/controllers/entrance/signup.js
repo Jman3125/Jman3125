@@ -39,6 +39,13 @@ the account verification message.)`,
       type: 'string',
       example: 'Frida Kahlo de Rivera',
       description: 'The user\'s full name.',
+    },
+
+    phone: {
+      required: false,
+      type: 'string',
+      example: '732-122-4215',
+      description: 'Honey potting for bots, if I get a value, cancel the request'
     }
 
   },
@@ -64,11 +71,17 @@ the account verification message.)`,
 
   },
 
-  fn: async function ({emailAddress, password, fullName}) {
+  fn: async function ({emailAddress, password, fullName, phone}) {
     //Capitalize full name
     String.prototype.capitalize = function(){
       return this.replace( /(^|\s)([a-z])/g , function(m,p1,p2){ return p1+p2.toUpperCase(); } );
     };
+
+    if (phone != null) {
+      var url_string = "http://localhost:1344/login"
+      var url = new URL(url_string);
+      return
+    }
 
     var capFullName = fullName.toLowerCase().capitalize();
 

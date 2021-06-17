@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<div>
+    <style>
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .outer-div {
+            display: flex; justify-content: center;  height: 100%; width: 100%; padding: 24px; 
+        }
+
+        .inner-div {
+            display: flex; justify-content: center; flex-direction: column; 
+        }
+    </style>
+    <div id="main">
+        <div id="app" class="outer-div">
+            <div class="inner-div">
+                <h1 style="line-break: anywhere;">{{user.fullName}}</h1>
+                <div style="width: fit-content;">
+                    <hr/>
+                    <div>
+                        <h2 style="line-break: auto;">Musician/Band or venue?</h3>
+                        <h4>{{user.isBand ? 'Musician/Band' : 'Venue'}}</h4>
+                    </div>
+                    <h1>-</h1>
+                    <div>
+                        <h2 style="line-break: auto;">Contact information</h3>
+                        <div>
+                            <h4>Email</h4>
+                            <h5 style="line-break: anywhere;">{{user.showEmail ? user.emailAddress : 'Public viewing of this users email has been turned off.'}}</h5>
+                            <div>
+                                <h4>Phone</h4>
+                                <h5 style="line-break: anywhere;">{{user.phone == "" ? 'This user chose not to provide a phone number.' : user.phone}}</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="user.isBand">
+                        <h1>-</h1>
+                        <h1>Musician/Band details</h1>
+                        <hr/>
+                        <div>
+                            <h2 style="line-break: auto;">Concert details</h2>
+                            <h5 style="line-break: anywhere;">{{user.details}}</h5>
+                        </div>
+                        <h1>-</h1>
+                        <div>
+                            <h2>Location</h2>
+                            <h5>{{user.location}}</h5>
+                        </div>
+                        <h1>-</h1>
+                        <div>
+                            <h2>Music type</h2>
+                            <h5>{{user.musicType}}</h5>
+                        </div>
+                        <h1>-</h1>
+                        <div>
+                            <h2>Music amount</h2>
+                            <h5 style="line-break: anywhere;">{{user.musicAmount}}</h5>
+                        </div>
+                        <h1>-</h1>
+                        <div>
+                            <h2>Cost</h2>
+                            <h5 style="line-break: anywhere;">{{user.moneyShow}}</h5>
+                        </div>
+                    </div>
+                    <div>
+                        <h1>-</h1>
+                        <h2 style="line-break: anywhere;">Want to see more of {{user.fullName}}?</h2>
+                        <h5 style="line-break: anywhere;">{{user.links == "" ? 'This user chose not to provide any social media links.' : user.links}}</h5>
+                        <h6 style="color: gray;">Copy the above link(s)</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../partials/loading.ejs') %>
+    </div>
+    
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data: {
+                user: null,
+            }, 
+            //Make the JSON call when the page loads
+            mounted () {
+                //GRAB THE REQUESTED USER ID FROM THE BROWSER
+                var url_string = window.location;
+                var url = new URL(url_string);
+                //Grabing the user Id from the browser here
+                var user = url.searchParams.get("user")
+                //Using jQuery to make ajax call
+                    $.ajax({
+                    data: null,
+                    async: true,
+                    url: "/user-info-data/" + user,
+                    context: this,
+                    statusCode: {
+                        401: function() {
+                            //If the user's session has expired, log them out so 
+                            //that they don't see a blank screen.
+                            window.location.replace('/logout')
+                        }
+                    },
+                    success: function(response) {
+                        this.user = response
+                        //Making the main div visible and loading view hidden once I have the data
+                        //The loading state is below this code
+                        $("#loading").css('visibility', 'hidden')
+                        $("#main").css('visibility', 'visible');
+                    }
+                })
+            }
+        })
+    </script>
+</div>

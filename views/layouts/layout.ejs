@@ -44,13 +44,12 @@
     <!--STYLES END-->
   </head>
   <body>
-    <!-- INSTALLING PACKAGES TO USE IN VIEW -->
+    <!-- INSTALLING PACKAGES TO USE IN CHILD VIEWS -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- <script>src="https://raw.githubusercontent.com/aFarkas/lazysizes/gh-pages/lazysizes.min.js"</script> -->
     <div purpose="page-wrap">
-      <header class="navbar navbar-expand-sm navbar-dark bg-white flex-column flex-md-row justify-content-between"   purpose="page-header">
+      <header class="navbar navbar-expand-sm navbar-dark bg-white flex-column flex-md-row justify-content-between" purpose="page-header">
         <a style="cursor: pointer;" class="navbar-brand mr-0" href="/"><img style="height: 50px;" class="logo" alt="NEW_APP_NAME logo" src="/images/logo.png"/></a>
         <div class="navbar-nav flex-row">
           <!-- LOGGED-IN NAVIGATION -->
@@ -60,17 +59,14 @@
           <div class="nav-item dropdown d-none d-sm-block">
             <a style="color: #035214;" class="nav-link dropdown-toggle" id="header-account-menu-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
             <div style="left: auto; right: 0;" class="dropdown-menu" aria-labelledby="header-account-menu-link">
-              <a class="dropdown-item" href="/account">Mi Account</a>
+              <a class="dropdown-item" href="/account">MI Account</a>
               <a class="dropdown-item" href="/logout">Sign out</a>
             </div>
           </div>
           <!-- Only in mobile nav -->
-          <a style="color: #035214;" class="nav-item nav-link ml-2 mr-2 d-block d-sm-none" href="/account">Mi Account</a>
+          <a style="color: #035214;" class="nav-item nav-link ml-2 mr-2 d-block d-sm-none" href="/account">MI Account</a>
           <a style="color: #035214;" class="nav-item nav-link ml-2 mr-2 d-block d-sm-none" href="/logout">Sign out</a>
           <% } else { %>
-          <!-- LOGGED-OUT NAVIGATION DON"T USE -->
-          <!-- <a class="nav-item nav-link ml-2 ml-md-0 mr-2" href="/faq">FAQ</a> -->
-          <!-- <a class="nav-item nav-link ml-2 ml-md-0 mr-2" href="/signin">Sign in</a> -->
           <!-- Only in desktop nav -->
           <div class="form-inline d-none ml-2 d-md-block" >
             <!-- <a class="btn btn-outline-info" href="/signup">Sign up</a> -->

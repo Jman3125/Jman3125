@@ -134,6 +134,13 @@
                     url: "data/" + location + "/" + musictype,
                     context: this,
                     dataType: "json",
+                    statusCode: {
+                        401: function() {
+                            //If the user's session has expired, log them out so 
+                            //that they don't see a blank screen.
+                            window.location.replace('/signin')
+                        }
+                    },
                     success: function(response) {
                         this.users = response
                         //Making the main div visible once I have the data

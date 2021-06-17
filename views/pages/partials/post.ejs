@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- Posts -->
 <div style="width: fit-content;
-    background-color: rgb(236, 235, 235);
+    background-color: rgb(224, 224, 224);
     padding: 24px;
     margin-bottom: 24px;">
     <div style="display: flex; margin-bottom: 16px;">
@@ -32,9 +32,26 @@
         </svg>
     </div>
     <div>
-        <strong><img :src="p.imageUrl" alt="Post picture" style="width: 355px;"></strong>
+        <strong><img :src="p.imageUrl" alt="Post picture" style="width: 355px; max-height: 500px; object-fit: scale-down;"></strong>
+    </div>
+    <div style="display: flex; flex-direction: row;">
+        <div v-if="p.showLikeBttn">
+            <button style="color: white; width: 255px; 
+            height: 52px; margin-top: 16px; 
+            cursor: pointer; font-size: xx-large; border-radius: 20px;" 
+            v-bind:style="p.hasLiked ? 'background-color: green' : 'background-color: grey'"
+            v-on:click="clap(p)">
+            {{p.hasLiked ? '👏' : '👐'}}
+        </button>
+        </div>
+        <div v-bind:style="p.showLikeBttn ? 'flex: 1' : 'flex: none'"></div>
+        <div style="margin-top: 24px;">
+            <a style="color: black; text-decoration: none;" :href="'/claps-page/post?p=' + p.id"><h5>{{p.numClaps}} claps</h5></a>
+            <hr/>
+        </div>
     </div>
     <div style="margin-top: 16px; line-break: anywhere;">
         <strong>{{p.text}}</strong>
     </div>
+
 </div>

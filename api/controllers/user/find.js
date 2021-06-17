@@ -46,8 +46,4 @@ module.exports = async function(req, res) {
 
     res.end()
 
-    // res.view('pages/user/search/search', {
-    //     layout: 'layouts/layout',
-    // })
-
 }

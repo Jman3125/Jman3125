@@ -9,19 +9,21 @@ module.exports = async function(req, res) {
         .populate('followers')
 
     //Find the posts to show in the account
-    const posts = await Post.find({user: currentId})
-        .populate('user').sort('createdAt DESC').limit(25)
+    const posts = await Post.find({user: req.session.userId}).sort('createdAt DESC')
+        .populate('user').limit(25)
 
     //Set the canDelete bool to true so that the 
     //current user can delete his/her posts
     posts.forEach(p => p.canDelete = true)
+
+    posts.forEach(p => p.hasLiked = p.hasLiked)
 
     //Set the current users posts to the posts from above
     currentUser.posts = posts
 
     //Grab the necessary info 
     const sanitizedUser = JSON.parse(JSON.stringify(currentUser))
-
+    
     //When the request from the page wants the JSON, send it here
     if (req.wantsJSON) {
         return res.send(sanitizedUser)

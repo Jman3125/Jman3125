@@ -25,6 +25,13 @@
                 background-color: green;
                 border-radius: 20px;
             }
+
+            .view-info {
+                width: 100%; 
+                height: 40px; 
+                border-radius: 24px; 
+                margin-top: 16px;
+            }
     
             .center-cropped {
                 object-position: center;
@@ -60,19 +67,29 @@
             <!-- I'm going to grab this value when I fire off a delete/post request... -->
             <input type="hidden" id="csrf" value="<%= _csrf %>"/>
             <div class="inner-div">
-                <!-- Profile & Name -->
+                <!-- PROFILE & NAME -->
                 <div style="display: flex; justify-content: center; flex-direction: column;">
                     <div>
-                        <strong><img :src="user.profileImageUrl ? user.profileImageUrl : '/images/placeholder-pic.png'" loading="lazy" class="center-cropped" alt="Profile picture"></strong>
+                        <strong><img :src="user.profileImageUrl ? user.profileImageUrl : '/images/placeholder-pic.png'" class="center-cropped" alt="Profile picture"></strong>
                     </div>
                     <h1 class="text-center" style="max-width: 360px; line-break: anywhere; margin-left: 15px;">
                         <strong>{{user.fullName}}</strong>
                     </h1>
+                    <div v-if="user.isBand">
+                        <h6 class="text-center" style="color: green; font-size: x-large;">Musician</h6>
+                    </div>
+                    <!-- FOLLOW BUTTON -->
                     <Button v-on:click="follow(user)" v-bind:class="user.isFollowing ? 'following' : 'not-following'" style="height: 40px;">
                         {{user.isFollowing ? 'Following' : 'Follow'}}
                     </Button>
+                    <!-- VIEW INFO BUTTON-->
+                    <a :href="'/user-info/user?user=' + user.id">
+                        <button class="view-info">
+                            User information
+                        </button>
+                    </a>
                 </div>
-                <!-- Follower & Following count -->
+                <!-- FOLLOWERS & FOLLOWING COUNT -->
                 <div class="outer-stats">
                     <div class="stats">
                         <a :href="'/followers/user?user=' + user.id"><h4 class="stats-style">Followers</h4></a>
@@ -87,7 +104,7 @@
                         <h4 class="text-center"><strong>{{user.posts.length}}</strong></h4>
                     </div>
                 </div>
-                <!-- Posts -->
+                <!-- POSTS -->
                 <div v-for="p in user.posts" style="width: 360px;">
                     <%- partial('../partials/post.ejs') %>
                 </div>
@@ -100,9 +117,34 @@
             const app = new Vue({
                 el: '#app',
                 data: {
-                    user: null
+                    user: null,
                 },
                 methods: {
+                    //Clap functions (liking a post)
+                    clap: async function(post) {
+                        axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                        if (post.hasLiked) {
+                            await axios.post('/unclap/' + post.id)
+                            //Forcing manuel update of the number of likes
+                            const originalId = post.id
+                            post.id = "TEMP"
+                            post.numClaps = post.numClaps - 1
+                            post.id = originalId
+                        } else {
+                            await axios.post('/clap/' + post.id)
+                            //Forcing manuel update of the number of likes
+                            const originalId = post.id
+                            post.id = "TEMP"
+                            post.numClaps = post.numClaps + 1
+                            post.id = originalId
+                        }
+                        
+                        //Force manual update of UI to show that the user has "clapped for" or liked a post
+                        const postId = post.id
+                        post.id = "TEMP"
+                        post.hasLiked = !post.hasLiked
+                        post.id = postId
+                    },
                     follow: async function(user) {
                         axios.defaults.headers.post['X-CSRF-Token'] = csrf;
                         if (user.isFollowing) {
@@ -131,8 +173,16 @@
                         url: "/user-data/" + user,
                         context: this,
                         dataType: "json",
+                        statusCode: {
+                            401: function() {
+                                //If the user's session has expired, log them out so 
+                                //that they don't see a blank screen.
+                                window.location.replace('/signin')
+                            }
+                        },
                         success: function(response) {
                             this.user = response
+                            console.log(this.user.posts)
                             //Making the main div visible and loading view hidden once I have the data
                             $("#loading").css('visibility', 'hidden')
                             $("#main").css('visibility', 'visible');

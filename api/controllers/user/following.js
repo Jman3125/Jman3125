@@ -5,10 +5,10 @@ module.exports = async function(req, res) {
     const user = await User.findOne({id: id})
         .populate('following')
 
-    const objects = JSON.parse(JSON.stringify(user))
+    const cleanedData = JSON.parse(JSON.stringify(user))
 
     if (req.wantsJSON) {
-        return res.send(objects)
+        return res.send(cleanedData)
     }
 
     res.end()

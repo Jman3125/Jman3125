@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <div>  
     <style>
         .center-cropped {
@@ -18,7 +17,7 @@
             <hr/>
             <div v-for="u in user.followers">
                 <div style=" display: flex; margin-bottom: 16px;">
-                    <img :src="u.profileImageUrl ? u.profileImageUrl : '/images/placeholder-pic.png'" loading="lazy" alt="Profile picture" class="center-cropped">
+                    <img :src="u.profileImageUrl ? u.profileImageUrl : '/images/placeholder-pic.png'" alt="Profile picture" class="center-cropped">
                     <a :href="'/profile/user?u=' + u.id" style="color: black; margin-top: 16px;">
                         {{u.fullName}} 
                     </a>
@@ -50,6 +49,13 @@
                     url: "data/" + user,
                     context: this,
                     dataType: "json",
+                    statusCode: {
+                        401: function() {
+                            //If the user's session has expired, log them out so 
+                            //that they don't see a blank screen.
+                            window.location.replace('/signin')
+                        }
+                    },
                     success: async function(response) {
                         this.user = response
                         //Making the main div visible and loading view hidden once I have the data

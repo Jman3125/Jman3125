@@ -1,0 +1,56 @@
+<div>
+    <!-- Main view -->
+    <div id="main" style="visibility: hidden;">
+        <div id="app" style="padding-left: 24px; padding-right: 24px;">
+            <h1>Claps</h1>
+            <hr/>
+            <div v-for="u in user" v-bind:key="u.id">
+                <a :href="'/public-profile/user?u=' + u.user.id" style="color: black; max-width: 360px; line-break: anywhere; margin-top: 10px;">
+                    {{u.user.fullName}}
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Loading state -->
+    <div id="loading" style="visibility: visible;">
+        <%- partial('../../partials/loading.ejs') %>
+    </div>
+    <script>
+        const app = new Vue ({
+            el: '#app',
+            data: {
+                user: null
+            },
+            //Make the JSON call when the page loads
+            mounted () {
+                //GRAB THE REQUESTED POST ID FROM THE BROWSER
+                var url_string = window.location;
+                var url = new URL(url_string);
+                //Grabing the post Id from the browser here
+                var post = url.searchParams.get("p")
+                //Using jQuery to make ajax call
+                    $.ajax({
+                    data: null,
+                    async: true,
+                    url: "/post-claps/" + post,
+                    context: this,
+                    dataType: "json",
+                    statusCode: {
+                        401: function() {
+                            //If the user's session has expired, log them out so 
+                            //that they don't see a blank screen.
+                            window.location.replace('/logout')
+                        }
+                    },
+                    success: function(response) {
+                        this.user = response
+                        //Making the main div visible and loading view hidden once I have the data
+                        //The loading state is below this code
+                        $("#loading").css('visibility', 'hidden')
+                        $("#main").css('visibility', 'visible');
+                    }
+                })
+            }
+        })
+    </script>
+</div>

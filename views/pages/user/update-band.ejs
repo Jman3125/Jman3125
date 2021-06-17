@@ -70,9 +70,9 @@
                     </textarea>
                     <h6 style="color: grey;">1000 character maximum</h6>
                 </div>
-                <!-- Details about show -->
+                <!-- Details about concert -->
                 <div style="margin-bottom: 16px;">
-                    <h5>What's your show like? (not required)</h5>
+                    <h5>What's your concert like? (not required)</h5>
                     <textarea v-model="user.details"
                         placeholder="We do a high energy show, our sets are about 30 minutes long....."
                         maxlength="1000">
@@ -157,7 +157,7 @@
                         <option value="Funk/ Soul">Funk/ Soul</option>
                         <option value="Rap">Rap</option>
                     </select>
-                    <h6 style="margin-top: 16px;"><a href="/contact">Missing something? Have advice? Please, tell us.</a></h6>                  
+                    <h6 style="margin-top: 16px;"><a href="/contact">Missing something? Have advice? Please, tell us.</a></h6>              
                 </div>
                 <!-- HOW MUCH MUSIC DO YOU HAVE -->
                 <div style="margin-bottom: 16px;">
@@ -172,9 +172,9 @@
                 </div>
                 <!-- LINKS -->
                 <div style="margin-bottom: 16px;">
-                    <h5>Links (not required)</h5>
-                    <input type="text" v-model="user.links" placeholder="https://mysocialmediaacount.com...." style="margin-bottom: 10px;">
-                    <h6 style="color: grey;">This is to let people see you play, it is highly recommended, just add a link to one of your social media accounts with videos.</h6>
+                    <h5>Social media links (not required)</h5>
+                    <input type="text" v-model="user.links" placeholder="https://socialmedia.com/myaccount...." style="margin-bottom: 10px;">
+                    <h6 style="color: grey;">Since MI Agent does not support videos, this will let people see you play, it is highly recommended, just add a full link to one of your social media accounts with videos!</h6>
                 </div>
                 <!-- PHONE NUMBER -->
                 <div style="margin-bottom: 16px;">
@@ -183,7 +183,7 @@
                     <h6 style="color: grey;">This is to let people get in touch with you in a different way, it is recommended.</h6>
                 </div>
                 <!-- TERMS -->
-                <label style="margin-left: 10px; width: 360px;">By clicking save, I have read & agree to the <br><a href="/terms">terms of service</a>. UPDATE ME BEFORE DEPLOY</label> 
+                <label style="margin-left: 10px; width: 360px;">By clicking save, I have read &amp; agree to the <br><a href="/band-terms">musicians term of service</a>.</label> 
                 <!-- SAVE BUTTON -->
                 <button v-bind:class="isSaving ? 'save-button-gray' : 'save-button'" v-on:click="handleSave()">Save</button>
 
@@ -241,6 +241,13 @@
                     async: true,
                     url: "band-form-data",
                     context: this,
+                    statusCode: {
+                        401: function() {
+                            //If the user's session has expired, log them out so 
+                            //that they don't see a blank screen.
+                            window.location.replace('/logout')
+                        }
+                    },
                     success: function(response) {
                         this.user = response
                         //Making the main div visible and loading view hidden once I have the data

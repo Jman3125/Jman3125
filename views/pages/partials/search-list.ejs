@@ -111,10 +111,10 @@
         padding: 16px; display: flex; width: 100%;" 
         v-bind:key="u.id">
         <div style="display: flex; justify-content: center;">
-            <img :src="u.profileImageUrl ? u.profileImageUrl : '/images/placeholder-pic.png'" loading="lazy" alt="Profile picture" class="center-cropped"  >
+            <img :src="u.profileImageUrl ? u.profileImageUrl : '/images/placeholder-pic.png'" alt="Profile picture" class="center-cropped"  >
 
             <div style="display: flex; flex-direction: column;">
-                <a :href="'/profile/user?u=' + u.id" style="color: black; max-width: 360px; line-break: anywhere; margin-top: 10px;">
+                <a :href="'/public-profile/user?u=' + u.id" style="color: black; max-width: 360px; line-break: anywhere; margin-top: 10px;">
                     {{u.fullName}} 
                 </a>
 
@@ -133,4 +133,3 @@
         </div>
     </div>
 </div>
-    

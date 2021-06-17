@@ -70,13 +70,19 @@
             width: 100%; height: 100%;
             top: 0; left: 0;
             position: fixed;
-            padding-top: 100px;
+            padding-top: 10px;
             background-color: rgba(0, 0, 0, 0.8);
         }
 
         .cnfrimDeleteTitle {
             font-size: 24px;
             font-weight: bold;
+        }
+        
+        .selectedPost {
+            max-width: 150px; 
+            max-height: 140px; 
+            object-fit: scale-down;
         }
 
         .xDismiss {
@@ -155,6 +161,12 @@
         p {
             margin-left: 16px;
         }
+
+        .toggleEmailPrivBttn {
+            color: white;
+            background-color: green;
+            margin-bottom: 10px;
+        }
     </style>
 
     <div id="app" class="outer-div">
@@ -202,8 +214,8 @@
                     </h1>
                     
                     <h4 style="margin-bottom: 24px;">
-                        If your image does not end with a .JPEG, .JPG, .PNG, or .ICO <br> then that is probably why.
-                        Please consider converting your image on the web or choosing <br> a new image, Sorry for the inconvenience.
+                        If your image does not end with a .JPEG, .JPG, .PNG, or .ICO <br> then that is probably why. Videos are not supported.
+                        Please consider converting your image on the web or choosing <br> a new image, sorry for the inconvenience.
                     </h4>
                     
                     <h1>
@@ -223,10 +235,10 @@
                         v-model="postBodyText" 
                         placeholder="Whats on your mind? Upcoming events? New stuff? Let us know!....."></textarea>
                         <div style="color: red;">
-                            Please NOTE: You must include text & image.
+                            NOTE: You must include text & image.
                         </div>
                         <div style="margin-bottom: 10px;">
-                            <img style="max-width: 100%; margin-top: 12px; max-height: 250px;" :src="postFileImageSource">
+                            <img class="selectedPost" :src="postFileImageSource">
                         </div>
                         <div>
                             <input v-on:change="handleFileChange" type="file">
@@ -290,6 +302,16 @@
                     <h5>Bio (not required)</h5>
                     <input v-model="user.bio" type="text" placeholder="Bio..." maxlength="1000">
                     <h6 style="color: grey;">1000 character maximum</h6>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h5>Phone (not required)</h5>
+                    <input v-model="user.phone" type="text" placeholder="Phone number..." maxlength="15">
+                    <h6 style="color: grey;">15 character maximum</h6>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h5>Show email</h5>
+                    <input type="button" :value="user.showEmail ? 'Yes' : 'No'" v-on:click="handleEmailPrivacy()" class="toggleEmailPrivBttn">
+                    <h6 style="color: grey;">If this is set to "Yes", your email will be shown on your public profile. If it is set to "No", it will be hidden. Click to change.</h6>
                 </div>
                 <div style="margin-bottom: 16px;">
                     <h5>Profile picture</h5>
@@ -364,9 +386,37 @@
                 showSettings: false,
                 isSaving: false,
                 avatarFile: null,
-                showError: false
+                showError: false,
+
             }, 
             methods: {
+                //Clap functions (liking a post)
+                clap: async function(post) {
+                    axios.defaults.headers.post['X-CSRF-Token'] = csrf;
+                    if (post.hasLiked) {
+                        //Remove the like or 'clap' from the post, dislike
+                        await axios.post('/unclap/' + post.id)
+                        //Forcing manuel update of the number of likes
+                        const originalId = post.id
+                        post.id = "TEMP"
+                        post.numClaps = post.numClaps - 1
+                        post.id = originalId
+                    } else {
+                        //Like or 'clap for' the post, 
+                        await axios.post('/clap/' + post.id)
+                        //Forcing manuel update of the number of likes
+                        const originalId = post.id
+                        post.id = "TEMP"
+                        post.numClaps = post.numClaps + 1
+                        post.id = originalId
+                    }
+
+                    //Force manual update of UI to show that the user has "clapped for" or liked a post
+                    const originalId = post.id
+                    post.id = "TEMP"
+                    post.hasLiked = !post.hasLiked
+                    post.id = originalId
+                },
                 //Delete functions
                 confirmDelete: async function() {
                     const postId = this.postToDelete.id
@@ -389,7 +439,7 @@
                     this.isShowingDelete = true
                     return
                 },
-                
+
                 //Post functions
                 createPost: async function() {
                     // Before sending our POST request, we create FormData with postBody 
@@ -417,6 +467,7 @@
 
                 showCreationForm: function() {
                     this.isShowingCreation = true
+                    this.showSettings = false
                 },
 
                 handleFileChange: function(event) {
@@ -430,7 +481,9 @@
                     const formData = new FormData()
                     this.isSaving = true
                     formData.append('fullName', this.user.fullName)
+                    formData.append('showEmail', this.user.showEmail)
                     formData.append('bio', this.user.bio)
+                    formData.append('phone', this.user.phone)
                     formData.append('imagefile', this.avatarFile)
                     //Fire off the req
                     try {
@@ -444,6 +497,14 @@
                         this.showError = true
                         console.error(err.toString())
                     }
+                },
+
+                handleEmailPrivacy: function() {
+                    //Force manual update of UI from "Yes" to "No" on the show email feature
+                    const originalId = this.user.id
+                    this.user.id = "TEMP"
+                    this.user.showEmail = !this.user.showEmail
+                    this.user.id = originalId
                 },
 
                 //HANDLE AVATAR CHANGE
@@ -460,6 +521,13 @@
                     async: true,
                     url: "account-data",
                     context: this,
+                    statusCode: {
+                        401: function() {
+                            //If the user's session has expired, log them out so 
+                            //that they don't see a blank screen.
+                            window.location.replace('/signin')
+                        }
+                    },
                     success: function(response) {
                         this.user = response
                         //Making the main div visible and loading view hidden once I have the data

@@ -12,6 +12,7 @@ module.exports = {
       fullName: this.fullName, 
       emailAddress: this.emailAddress,
       profileImageUrl: this.profileImageUrl,
+      showEmail: this.showEmail,
       following: this.following,
       followers: this.followers,
       posts: this.posts,
@@ -30,6 +31,11 @@ module.exports = {
   },
 
   attributes: {
+    //Toggle this boolean in case the user decides that their email should NOT be shown to others in their pub. profile
+    showEmail: { 
+      type: 'boolean', 
+      defaultsTo: true
+    },
 
     following: {
       collection: 'user',
@@ -43,7 +49,8 @@ module.exports = {
 
     profileImageUrl: {
       type: 'string',
-      description: 'Profile image for the user'
+      description: 'Profile image for the user',
+      defaultsTo: '/images/placeholder-pic.png'
     },
 
     bio: {
@@ -51,7 +58,7 @@ module.exports = {
       description: 'This is for bands and users, it gives them a chance to share other info about themselves'
     },
 
-    //These are going to be the band attributes
+    //Below are going to be the band attributes
 
     isBand: { 
       type: 'boolean', 
