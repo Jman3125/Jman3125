@@ -28,8 +28,7 @@ module.exports.session = {
 
   adapter: 'connect-mongo',
 
-  url: 'mongodb://admin-user:Online1!@cluster0-shard-00-00.4c6tq.mongodb.net:27017,cluster0-shard-00-01.4c6tq.mongodb.net:27017,cluster0-shard-00-02.4c6tq.mongodb.net:27017/My-Agent?ssl=true&replicaSet=atlas-11ei1d-shard-0&authSource=admin&retryWrites=true&w=majority',
-
+  url: ''
   /***************************************************************************
   *                                                                          *
   * Customize when built-in session support will be skipped.                 *
